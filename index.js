@@ -11,7 +11,14 @@ const { ytmp4 } = require('./api/ytmp4');
 const { ytmp3 } = require('./api/ytmp3');
 const { igdl, instagram } = require('./api/instagramdl');
 const { googleImage } = require('./api/googleimage');
+const { pinterest } = require('./api/pindl');
 const { ttp } = require('./api/ttp');
+const { facebook } = require('./api/facebookdl');
+const { ArtiNama } = require('./api/artinama.js');
+const { kbbi } = require('./api/kbbi.js');
+const { manga } = require('./api/manga.js');
+const chara = require('./api/chara');
+app.use('/api/manga', require('./api/manga.js'));
 
 app.use((req, res, next) => {
   res.header('Access-Control-Allow-Origin', '*');
@@ -123,6 +130,80 @@ app.get('/ttp', async (req, res) => {
   } catch (error) {
     console.error('Error while generating transparent text effect:', error);
     res.status(500).json({ error: 'Error while generating transparent text effect' });
+  }
+});
+
+// pinterest search
+app.get('/pinterest', async (req, res) => {
+  const { query } = req.query;
+
+  try {
+    const results = await pinterest(query);
+    res.json(results);
+  } catch (error) {
+    console.error('Error while fetching images from Pinterest:', error);
+    res.status(500).json({ error: 'Error while fetching images from Pinterest' });
+  }
+});
+
+// facebook download
+app.get('/facebook', async (req, res) => {
+  const { url } = req.query;
+
+  try {
+    const videoData = await facebook(url);
+    res.json(videoData);
+  } catch (error) {
+    console.error('Error while downloading video from Facebook:', error);
+    res.status(500).json({ error: 'Error while downloading video from Facebook' });
+  }
+});
+
+
+// chara
+app.get('/chara', async (req, res) => {
+  const query = req.query.query || '';
+
+  try {
+    const result = await chara(query);
+    res.json(result);
+  } catch (error) {
+    console.error('Error while fetching character images:', error);
+    res.status(500).json({ error: 'Error while fetching character images' });
+  }
+});
+
+// artinama
+app.get('/artinama', async (req, res) => {
+  const { query } = req.query;
+  try {
+    const result = await ArtiNama(query);
+    res.json({ arti: result });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// kbbi
+app.get('/api/kbbi/:query', async (req, res) => {
+  const query = req.params.query;
+  try {
+      const arti = await kbbi(query);
+      res.json({ query, arti });
+  } catch (error) {
+      res.status(500).json({ error: 'Terjadi kesalahan saat mengambil data dari KBBI.' });
+  }
+});
+
+
+// manga
+app.get('/api/manga/:query', async (req, res) => {
+  const query = req.params.query;
+  try {
+      const mangaList = await manga(query);
+      res.json(mangaList);
+  } catch (error) {
+      res.status(500).json({ error: 'Terjadi kesalahan saat mencari manga.' });
   }
 });
 
